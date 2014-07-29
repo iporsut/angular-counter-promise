@@ -1,0 +1,57 @@
+<!doctype html>
+<html ng-app="CounterApp">
+
+<head>
+    <meta charset="utf-8" />
+    <script src="js/angular.min.js"></script>
+    <script>
+        var counterApp = angular.module("CounterApp", []);
+
+        counterApp.service("CounterService", [
+            "$q",
+            function($q) {
+                var deferred = $q.defer();
+                var promise = deferred.promise;
+                var state = 0;
+
+                this.count = function() {
+                    deferred.notify();
+                    return promise;
+                };
+
+                this.getState = function() {
+                    return state;
+                };
+
+                promise.then(null, null,
+                    function() {
+                        state++;
+                    }
+                );
+
+            }
+        ]);
+
+        counterApp.controller("CounterController", [
+            "CounterService",
+            function(CounterService) {
+                var self = this;
+                self.state = 0;
+                this.onButtonClick = function() {
+                    CounterService.count().then(null, null,
+                        function() {
+                            self.state = CounterService.getState();
+                        }
+                    );
+                };
+            }
+        ]);
+    </script>
+</head>
+
+<body ng-controller="CounterController as counterController">
+    <button ng-click="counterController.onButtonClick()">Count</button>
+    <p>{{ counterController.state }}</p>
+</body>
+
+</html>
